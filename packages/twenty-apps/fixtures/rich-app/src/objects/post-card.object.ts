@@ -1,10 +1,11 @@
-import { defineObject, FieldType } from 'twenty-sdk';
+import { defineObject, FieldType } from 'twenty-sdk/define';
 
 enum PostCardStatus {
   DRAFT = 'DRAFT',
   SENT = 'SENT',
   DELIVERED = 'DELIVERED',
   RETURNED = 'RETURNED',
+  LOST = 'LOST',
 }
 
 export const POST_CARD_UNIVERSAL_IDENTIFIER =
@@ -12,6 +13,13 @@ export const POST_CARD_UNIVERSAL_IDENTIFIER =
 
 export const CONTENT_FIELD_UNIVERSAL_IDENTIFIER =
   '58a0a314-d7ea-4865-9850-7fb84e72f30b';
+
+export const STATUS_FIELD_UNIVERSAL_IDENTIFIER =
+  '87b675b8-dd8c-4448-b4ca-20e5a2234a1e';
+
+export const DELIVERED_AT_FIELD_UNIVERSAL_IDENTIFIER =
+  'e06abe72-5b44-4e7f-93be-afc185a3c433';
+
 export default defineObject({
   universalIdentifier: POST_CARD_UNIVERSAL_IDENTIFIER,
   nameSingular: 'postCard',
@@ -46,45 +54,52 @@ export default defineObject({
       name: 'recipientAddress',
     },
     {
-      universalIdentifier: '87b675b8-dd8c-4448-b4ca-20e5a2234a1e',
+      universalIdentifier: STATUS_FIELD_UNIVERSAL_IDENTIFIER,
       type: FieldType.SELECT,
       label: 'Status',
       icon: 'IconSend',
       defaultValue: `'${PostCardStatus.DRAFT}'`,
       options: [
         {
-          id: 'a1b2c3d4-0001-4000-8000-000000000001',
+          id: '1b008e19-1e59-4a07-b187-65a20e547c4e',
           value: PostCardStatus.DRAFT,
           label: 'Draft',
           position: 0,
           color: 'gray',
         },
         {
-          id: 'a1b2c3d4-0002-4000-8000-000000000002',
+          id: '452b9d40-889c-4342-9697-98319394db04',
           value: PostCardStatus.SENT,
           label: 'Sent',
           position: 1,
           color: 'orange',
         },
         {
-          id: 'a1b2c3d4-0003-4000-8000-000000000003',
+          id: 'c2ed0b8c-a3ed-4383-aef9-e0441267bcfe',
           value: PostCardStatus.DELIVERED,
           label: 'Delivered',
           position: 2,
           color: 'green',
         },
         {
-          id: 'a1b2c3d4-0004-4000-8000-000000000004',
+          id: 'c57a5e08-7ef7-49b8-87e6-32d720d22802',
           value: PostCardStatus.RETURNED,
           label: 'Returned',
           position: 3,
           color: 'orange',
         },
+        {
+          // No id — exercises addMissingFieldOptionIds in the object branch
+          value: PostCardStatus.LOST,
+          label: 'Lost',
+          position: 4,
+          color: 'red',
+        },
       ],
       name: 'status',
     },
     {
-      universalIdentifier: 'e06abe72-5b44-4e7f-93be-afc185a3c433',
+      universalIdentifier: DELIVERED_AT_FIELD_UNIVERSAL_IDENTIFIER,
       type: FieldType.DATE_TIME,
       label: 'Delivered at',
       icon: 'IconCheck',

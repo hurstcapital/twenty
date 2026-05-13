@@ -3,7 +3,6 @@ import { join } from 'path';
 import { v4 } from 'uuid';
 
 import createTwentyAppPackageJson from 'package.json';
-import chalk from 'chalk';
 
 const SRC_FOLDER = 'src';
 
@@ -12,32 +11,72 @@ export const copyBaseApplicationProject = async ({
   appDisplayName,
   appDescription,
   appDirectory,
+  onProgress,
 }: {
   appName: string;
   appDisplayName: string;
   appDescription: string;
   appDirectory: string;
+  onProgress?: (message: string) => void;
 }) => {
-  console.log(chalk.gray('Generating application project...'));
+  onProgress?.('Copying base template');
   await fs.copy(join(__dirname, './constants/template'), appDirectory);
 
-  await renameGitignore({ appDirectory });
+  onProgress?.('Configuring dotfiles (.gitignore, .github)');
+  await renameDotfiles({ appDirectory });
 
+  onProgress?.('Mirroring AGENTS.md to CLAUDE.md');
+  await mirrorAgentsToClaude({ appDirectory });
+
+  await addEmptyPublicDirectory({ appDirectory });
+
+  onProgress?.('Generating unique application identifiers');
   await generateUniversalIdentifiers({
     appDisplayName,
     appDescription,
     appDirectory,
   });
 
+  onProgress?.('Updating package.json');
   await updatePackageJson({ appName, appDirectory });
 };
 
-const renameGitignore = async ({ appDirectory }: { appDirectory: string }) => {
-  const gitignorePath = join(appDirectory, 'gitignore');
+// npm strips dotfiles/dotdirs (.gitignore, .github/) from published packages,
+// so we store them without the leading dot and rename after copying.
+const renameDotfiles = async ({ appDirectory }: { appDirectory: string }) => {
+  const renames = [
+    { from: 'gitignore', to: '.gitignore' },
+    { from: 'github', to: '.github' },
+  ];
 
-  if (await fs.pathExists(gitignorePath)) {
-    await fs.rename(gitignorePath, join(appDirectory, '.gitignore'));
+  for (const { from, to } of renames) {
+    const sourcePath = join(appDirectory, from);
+
+    if (await fs.pathExists(sourcePath)) {
+      await fs.rename(sourcePath, join(appDirectory, to));
+    }
   }
+};
+
+// AGENTS.md is the cross-tool standard; Claude Code prefers CLAUDE.md and only
+// falls back to AGENTS.md, so we mirror the file to keep a single source of truth.
+const mirrorAgentsToClaude = async ({
+  appDirectory,
+}: {
+  appDirectory: string;
+}) => {
+  await fs.copy(
+    join(appDirectory, 'AGENTS.md'),
+    join(appDirectory, 'CLAUDE.md'),
+  );
+};
+
+const addEmptyPublicDirectory = async ({
+  appDirectory,
+}: {
+  appDirectory: string;
+}) => {
+  await fs.ensureDir(join(appDirectory, 'public'));
 };
 
 const generateUniversalIdentifiers = async ({

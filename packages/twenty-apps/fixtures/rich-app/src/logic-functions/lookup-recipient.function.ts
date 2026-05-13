@@ -1,4 +1,4 @@
-import { defineLogicFunction } from 'twenty-sdk';
+import { defineLogicFunction } from 'twenty-sdk/define';
 
 const handler = async (params: { recipientName: string }) => {
   return { found: true, name: params.recipientName };
@@ -10,5 +10,13 @@ export default defineLogicFunction({
   description: 'Look up a recipient by name to find their details',
   timeoutSeconds: 5,
   handler,
-  isTool: true,
+  toolTriggerSettings: {
+    inputSchema: {
+      type: 'object',
+      properties: {
+        recipientName: { type: 'string' },
+      },
+      required: ['recipientName'],
+    },
+  },
 });

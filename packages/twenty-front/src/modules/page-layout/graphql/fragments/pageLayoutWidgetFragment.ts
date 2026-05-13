@@ -3,14 +3,16 @@ import { gql } from '@apollo/client';
 export const PAGE_LAYOUT_WIDGET_FRAGMENT = gql`
   fragment PageLayoutWidgetFragment on PageLayoutWidget {
     id
+    applicationId
     title
     type
     objectMetadataId
-    isOverridden
     createdAt
     updatedAt
+    isActive
     deletedAt
     conditionalDisplay
+    conditionalAvailabilityExpression
     gridPosition {
       column
       columnSpan

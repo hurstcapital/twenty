@@ -1,5 +1,5 @@
 import { isNonEmptyString } from '@sniptt/guards';
-import deepEqual from 'deep-equal';
+import { fastDeepEqual } from 'twenty-shared/utils';
 
 import {
   type DiscoveredMessageFolder,
@@ -11,11 +11,9 @@ import { type MessageFolderEntity } from 'src/engine/metadata-modules/message-fo
 export const computeFoldersToUpdate = ({
   discoveredFolders,
   existingFolders,
-  externalIdToUuidMap,
 }: {
   discoveredFolders: DiscoveredMessageFolder[];
   existingFolders: MessageFolder[];
-  externalIdToUuidMap: Map<string, string>;
 }): Map<string, Partial<MessageFolderEntity>> => {
   const existingFoldersByExternalId = new Map(
     existingFolders.map((folder) => [folder.externalId, folder]),
@@ -32,16 +30,14 @@ export const computeFoldersToUpdate = ({
       continue;
     }
 
-    const resolvedParentFolderId = isNonEmptyString(
-      discoveredFolder.parentFolderId,
-    )
-      ? (externalIdToUuidMap.get(discoveredFolder.parentFolderId) ?? null)
+    const parentFolderId = isNonEmptyString(discoveredFolder.parentFolderId)
+      ? discoveredFolder.parentFolderId
       : null;
 
     const discoveredFolderData = {
       name: discoveredFolder.name,
       isSentFolder: discoveredFolder.isSentFolder,
-      parentFolderId: resolvedParentFolderId,
+      parentFolderId,
     };
 
     const existingFolderData = {
@@ -52,7 +48,7 @@ export const computeFoldersToUpdate = ({
         : null,
     };
 
-    if (!deepEqual(discoveredFolderData, existingFolderData)) {
+    if (!fastDeepEqual(discoveredFolderData, existingFolderData)) {
       foldersToUpdate.set(existingFolder.id, discoveredFolderData);
     }
   }

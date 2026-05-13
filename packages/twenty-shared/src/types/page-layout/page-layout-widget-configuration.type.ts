@@ -99,12 +99,12 @@ export type RecordTableConfiguration = {
 export type FieldConfiguration = {
   configurationType: 'FIELD';
   fieldMetadataId: string;
-  fieldDisplayMode: 'CARD' | 'FIELD' | 'VIEW';
+  fieldDisplayMode: 'CARD' | 'EDITOR' | 'FIELD' | 'VIEW';
 };
 
 export type FieldsConfiguration = {
   configurationType: 'FIELDS';
-  viewId?: string | null;
+  viewId?: SerializedRelation | null;
   newFieldDefaultVisibility?: boolean | null;
   shouldAllowUserToSeeHiddenFields?: boolean;
 };

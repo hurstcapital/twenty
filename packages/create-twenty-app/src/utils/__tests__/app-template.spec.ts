@@ -76,10 +76,15 @@ describe('copyBaseApplicationProject', () => {
       appDirectory: testAppDirectory,
     });
 
-    expect(fs.copy).toHaveBeenCalledTimes(1);
+    // Two fs.copy calls: (1) the template directory, (2) AGENTS.md → CLAUDE.md
+    expect(fs.copy).toHaveBeenCalledTimes(2);
     expect(fs.copy).toHaveBeenCalledWith(
       expect.stringContaining('template'),
       testAppDirectory,
+    );
+    expect(fs.copy).toHaveBeenCalledWith(
+      join(testAppDirectory, 'AGENTS.md'),
+      join(testAppDirectory, 'CLAUDE.md'),
     );
   });
 
@@ -147,6 +152,25 @@ describe('copyBaseApplicationProject', () => {
     expect(packageJson.dependencies['twenty-client-sdk']).toBe(
       createTwentyAppPackageJson.version,
     );
+  });
+
+  it('should create an empty public directory in the scaffolded project', async () => {
+    await copyBaseApplicationProject({
+      appName: 'my-test-app',
+      appDisplayName: 'My Test App',
+      appDescription: 'A test application',
+      appDirectory: testAppDirectory,
+    });
+
+    const publicDirectoryPath = join(testAppDirectory, 'public');
+
+    expect(await fs.pathExists(publicDirectoryPath)).toBe(true);
+
+    const publicDirectoryStats = await fs.stat(publicDirectoryPath);
+    expect(publicDirectoryStats.isDirectory()).toBe(true);
+
+    const publicDirectoryContents = await fs.readdir(publicDirectoryPath);
+    expect(publicDirectoryContents).toHaveLength(0);
   });
 
   it('should handle empty description', async () => {

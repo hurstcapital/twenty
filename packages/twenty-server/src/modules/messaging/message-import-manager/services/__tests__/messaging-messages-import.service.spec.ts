@@ -15,7 +15,7 @@ import { EmailAliasManagerService } from 'src/modules/connected-account/email-al
 import { ConnectedAccountRefreshTokensService } from 'src/modules/connected-account/refresh-tokens-manager/services/connected-account-refresh-tokens.service';
 import { type ConnectedAccountEntity } from 'src/engine/metadata-modules/connected-account/entities/connected-account.entity';
 import { MessageChannelSyncStatusService } from 'src/modules/messaging/common/services/message-channel-sync-status.service';
-import { MESSAGING_GMAIL_USERS_MESSAGES_GET_BATCH_SIZE } from 'src/modules/messaging/message-import-manager/drivers/gmail/constants/messaging-gmail-users-messages-get-batch-size.constant';
+import { TwentyConfigService } from 'src/engine/core-modules/twenty-config/twenty-config.service';
 import { MessagingAccountAuthenticationService } from 'src/modules/messaging/message-import-manager/services/messaging-account-authentication.service';
 import { MessagingGetMessagesService } from 'src/modules/messaging/message-import-manager/services/messaging-get-messages.service';
 import { MessageImportExceptionHandlerService } from 'src/modules/messaging/message-import-manager/services/messaging-import-exception-handler.service';
@@ -26,6 +26,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { MessagingMonitoringService } from 'src/modules/messaging/monitoring/services/messaging-monitoring.service';
 import { MessageChannelEntity } from 'src/engine/metadata-modules/message-channel/entities/message-channel.entity';
 import { UserWorkspaceEntity } from 'src/engine/core-modules/user-workspace/user-workspace.entity';
+import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
 
 describe('MessagingMessagesImportService', () => {
   let service: MessagingMessagesImportService;
@@ -183,6 +184,20 @@ describe('MessagingMessagesImportService', () => {
           findOne: jest.fn().mockResolvedValue({ userId: 'user-id' }),
         },
       },
+      {
+        provide: getRepositoryToken(WorkspaceEntity),
+        useValue: {
+          findOne: jest
+            .fn()
+            .mockResolvedValue({ isInternalMessagesImportEnabled: false }),
+        },
+      },
+      {
+        provide: TwentyConfigService,
+        useValue: {
+          get: jest.fn().mockReturnValue(400),
+        },
+      },
     ];
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -281,7 +296,7 @@ describe('MessagingMessagesImportService', () => {
 
   it('should process message batch import of more than MESSAGING_GMAIL_USERS_MESSAGES_GET_BATCH_SIZE successfully', async () => {
     const arrayMessagesBig = Array.from(
-      { length: MESSAGING_GMAIL_USERS_MESSAGES_GET_BATCH_SIZE + 1 },
+      { length: 401 },
       (_, index) => `message-id-${index + 1}`,
     );
 

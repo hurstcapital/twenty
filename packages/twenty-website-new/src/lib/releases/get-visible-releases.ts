@@ -1,5 +1,5 @@
 import type { LocalReleaseNote } from '@/lib/releases/types';
-import { getFormattedReleaseNumber } from '@/lib/semver/get-formatted-release-number';
+import { getFormattedReleaseNumber } from '@/lib/releases/get-formatted-release-number';
 
 function safeReleaseNumber(version: string): number | null {
   try {
@@ -14,18 +14,18 @@ export function getVisibleReleaseNotes(
   latestPublishedTag: string | null,
 ): LocalReleaseNote[] {
   if (!latestPublishedTag) {
-    return notes;
+    return [];
   }
 
   const publishedNumber = safeReleaseNumber(latestPublishedTag);
   if (publishedNumber === null) {
-    return notes;
+    return [];
   }
 
   return notes.filter((note) => {
     const noteNumber = safeReleaseNumber(note.release);
     if (noteNumber === null) {
-      return true;
+      return false;
     }
     return noteNumber <= publishedNumber;
   });

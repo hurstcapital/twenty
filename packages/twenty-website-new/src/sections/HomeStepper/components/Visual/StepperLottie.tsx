@@ -1,11 +1,14 @@
 'use client';
 
-import { theme } from '@/theme';
 import { styled } from '@linaria/react';
-import Lottie from 'lottie-react';
-import { useEffect, useState } from 'react';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
-export const HOME_STEPPER_LOTTIE_SRC = '/images/home/stepper/lottie.json';
+import { theme } from '@/theme';
+
+import { useDotLottieScrollSync } from './use-dot-lottie-scroll-sync';
+
+const HOME_STEPPER_LOTTIE_SRC =
+  '/lottie/stepper/stepper.lottie?v=data-model-icon-white-4-logic-outline';
 
 const LottieSlot = styled.div`
   box-sizing: border-box;
@@ -16,49 +19,23 @@ const LottieSlot = styled.div`
   width: 100%;
 `;
 
-type LottieAnimationData = Record<string, unknown>;
+type StepperLottieProps = {
+  scrollProgress: number;
+};
 
-export function StepperLottie() {
-  const [animationData, setAnimationData] = useState<LottieAnimationData | null>(
-    null,
-  );
-
-  useEffect(() => {
-    let cancelled = false;
-
-    fetch(HOME_STEPPER_LOTTIE_SRC)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Lottie fetch failed: ${response.status}`);
-        }
-        return response.json() as Promise<LottieAnimationData>;
-      })
-      .then((data) => {
-        if (!cancelled) {
-          setAnimationData(data);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setAnimationData(null);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (!animationData) {
-    return <LottieSlot aria-hidden />;
-  }
+export function StepperLottie({ scrollProgress }: StepperLottieProps) {
+  const dotLottieRefCallback = useDotLottieScrollSync(scrollProgress);
 
   return (
     <LottieSlot aria-hidden>
-      <Lottie
-        animationData={animationData}
-        loop
+      <DotLottieReact
+        autoplay={false}
+        dotLottieRefCallback={dotLottieRefCallback}
+        layout={{ align: [0.5, 0.5], fit: 'contain' }}
+        loop={false}
+        src={HOME_STEPPER_LOTTIE_SRC}
         style={{ height: '100%', maxWidth: '100%', width: '100%' }}
+        useFrameInterpolation
       />
     </LottieSlot>
   );
